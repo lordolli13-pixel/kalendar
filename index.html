@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Můj Plánovač 2026</title>
+    <style>
+        :root { --primary: #333; --accent: #007BFF; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f9; margin: 0; padding: 10px; user-select: none; display: flex; flex-direction: column; align-items: center; }
+        .controls-panel { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 20px; width: 100%; max-width: 950px; display: flex; flex-wrap: wrap; justify-content: space-around; align-items: center; gap: 15px; border-bottom: 5px solid #333; }
+        .nav-section { display: flex; align-items: center; gap: 10px; }
+        .display-label { font-size: 1.2em; font-weight: 800; min-width: 150px; text-align: center; }
+        .stats-bar { background: #333; color: white; padding: 10px 20px; border-radius: 50px; display: flex; gap: 15px; font-weight: bold; font-size: 0.8em; margin-bottom: 10px; }
+        .tools { display: flex; gap: 10px; }
+        .tool { cursor: pointer; opacity: 0.4; text-align: center; font-size: 0.8em; }
+        .tool.active { opacity: 1; transform: scale(1.1); }
+        .dot { width: 30px; height: 30px; border-radius: 8px; margin: 0 auto 3px; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .bg-work { background: red; } .bg-off { background: green; } .bg-vacation { background: orange; }
+        .view-container { display: grid; gap: 20px; width: 100%; max-width: 1100px; }
+        .month-view { grid-template-columns: 1fr; max-width: 400px; }
+        .year-view { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+        .month-card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: separate; border-spacing: 4px; }
+        td { width: 40px; height: 40px; text-align: center; font-weight: 700; background: #fff; border: 1px solid #ddd; border-radius: 10px; cursor: pointer; position: relative; }
+        .today { border: 3px solid #000 !important; background-color: #fff9c4 !important; }
+        .work { background: red !important; color: white !important; }
+        .day-off { background: green !important; color: white !important; }
+        .vacation { background: orange !important; color: black !important; }
+        .empty { border: none !important; background: transparent !important; }
+        .btn { border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-blue { background: var(--accent); color: white; }
+    </style>
+</head>
+<body onmouseup="stopDrawing()">
+
+    <div class="stats-bar">
+        <div>PRÁCE: <span id="count-work" style="color:#ffcc00">0</span></div>
+        <div>VOLNO: <span id="count-off" style="color:#ffcc00">0</span></div>
+        <div>DOVOLENÁ: <span id="count-vacation" style="color:#ffcc00">0</span></div>
+    </div>
+
+    <div class="controls-panel">
+        <div class="nav-section">
+            <button class="btn" onclick="navigate(-1)">❮</button>
+            <span id="displayLabel" class="display-label">---</span>
+            <button class="btn" onclick="navigate(1)">❯</button>
+        </div>
+        <div class="tools">
+            <div class="tool active" onclick="setTool('work', this)"><div class="dot bg-work"></div>Práce</div>
+            <div class="tool" onclick="setTool('day-off', this)"><div class="dot bg-off"></div>Volno</div>
+            <div class="tool" onclick="setTool('vacation', this)"><div class="dot bg-vacation"></div>Dovolená</div>
+            <div class="tool" onclick="setTool('clear', this)"><div class="dot" style="background:#888"></div>Smazat</div>
+        </div>
+        <button class="btn btn-blue" id="viewToggle" onclick="toggleView()">Celý rok</button>
+    </div>
+
+    <div id="calendarContainer" class="view-container month-view"></div>
+
+    <script>
+        // NAČÍTÁNÍ Z LOCAL STORAGE (Paměť prohlížeče)
+        let storage = JSON.parse(localStorage.getItem('myPlannerData2026')) || {};
+        
+        let currentDate = new Date();
+        let currentTool = 'work';
+        let isDrawing = false;
+        let isYearView = false;
+        const months = ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
+        const realToday = new Date();
+
+        function saveData() {
+            localStorage.setItem('myPlannerData2026', JSON.stringify(storage));
+            updateStats();
+        }
+
+        function setTool(tool, element) {
+            currentTool = tool;
+            document.querySelectorAll('.tool').forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function applyTool(cell, dayId) {
+            if (currentTool === 'clear') { delete storage[dayId]; cell.className = cell.classList.contains('today') ? 'today' : ''; }
+            else { 
+                storage[dayId] = currentTool; 
+                cell.className = currentTool + (cell.classList.contains('today') ? ' today' : '');
+            }
+            saveData();
+        }
+
+        function navigate(step) {
+            if (isYearView) currentDate.setFullYear(currentDate.getFullYear() + step);
+            else currentDate.setMonth(currentDate.getMonth() + step);
+            render();
+        }
+
+        function toggleView() {
+            isYearView = !isYearView;
+            document.getElementById('calendarContainer').className = isYearView ? "view-container year-view" : "view-container month-view";
+            document.getElementById('viewToggle').textContent = isYearView ? "Měsíční pohled" : "Celý rok";
+            render();
+        }
+
+        function createMonthHTML(year, mIdx) {
+            const card = document.createElement('div');
+            card.className = 'month-card';
+            card.innerHTML = `<h3 style="text-align:center; margin-top:0;">${months[mIdx]} ${year}</h3>`;
+            const table = document.createElement('table');
+            const tbody = document.createElement('tbody');
+            let first = new Date(year, mIdx, 1).getDay();
+            let start = (first === 0) ? 6 : first - 1;
+            let days = new Date(year, mIdx + 1, 0).getDate();
+            let day = 1;
+
+            for (let r = 0; r < 6; r++) {
+                const tr = document.createElement('tr');
+                for (let c = 0; c < 7; c++) {
+                    const cell = document.createElement('td');
+                    if ((r === 0 && c < start) || day > days) { cell.className = 'empty'; }
+                    else {
+                        const dayId = `d-${year}-${mIdx}-${day}`;
+                        cell.textContent = day;
+                        if (storage[dayId]) cell.classList.add(storage[dayId]);
+                        if (day === realToday.getDate() && mIdx === realToday.getMonth() && year === realToday.getFullYear()) cell.classList.add('today');
+
+                        cell.onmousedown = () => { isDrawing = true; applyTool(cell, dayId); };
+                        cell.onmouseenter = () => { if(isDrawing) applyTool(cell, dayId); };
+                        day++;
+                    }
+                    tr.appendChild(cell);
+                }
+                tbody.appendChild(tr); if (day > days) break;
+            }
+            table.appendChild(tbody); card.appendChild(table); return card;
+        }
+
+        function updateStats() {
+            let w = 0, o = 0, v = 0;
+            const y = currentDate.getFullYear();
+            const m = currentDate.getMonth();
+            for (let key in storage) {
+                if (key.startsWith(`d-${y}`)) {
+                    if (!isYearView && !key.startsWith(`d-${y}-${m}-`)) continue;
+                    if (storage[key] === 'work') w++;
+                    if (storage[key] === 'day-off') o++;
+                    if (storage[key] === 'vacation') v++;
+                }
+            }
+            document.getElementById('count-work').textContent = w;
+            document.getElementById('count-off').textContent = o;
+            document.getElementById('count-vacation').textContent = v;
+        }
+
+        function render() {
+            const container = document.getElementById('calendarContainer');
+            container.innerHTML = '';
+            const y = currentDate.getFullYear();
+            document.getElementById('displayLabel').textContent = isYearView ? y : months[currentDate.getMonth()] + " " + y;
+            const toShow = isYearView ? [0,1,2,3,4,5,6,7,8,9,10,11] : [currentDate.getMonth()];
+            toShow.forEach(mIdx => container.appendChild(createMonthHTML(y, mIdx)));
+            updateStats();
+        }
+        function stopDrawing() { isDrawing = false; }
+        render();
+    </script>
+</body>
+</html>
