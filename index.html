@@ -3,214 +3,330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plánovač 2026</title>
+    <title>Plánovač 2026 - GitHub Sync</title>
     <style>
-        :root { --primary: #007BFF; --3d-shadow: rgba(0, 0, 0, 0.2); --today-border: #0056b3; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f9; margin: 0; padding: 20px; user-select: none; display: flex; flex-direction: column; align-items: center; }
-        
-        .controls-panel { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 20px; width: 100%; max-width: 1000px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; border-bottom: 5px solid var(--primary); }
-        .nav-section { display: flex; align-items: center; gap: 15px; }
-        .display-label { font-size: 1.5em; font-weight: 800; min-width: 200px; text-align: center; }
-        
-        .tools { display: flex; gap: 15px; }
-        .tool { display: flex; flex-direction: column; align-items: center; cursor: pointer; font-size: 0.85em; font-weight: bold; opacity: 0.4; transition: 0.2s; }
-        .tool.active { opacity: 1; transform: translateY(-3px); }
-        .dot { width: 35px; height: 35px; border-radius: 10px; margin-bottom: 5px; border: 2px solid #fff; box-shadow: 0 4px 6px var(--3d-shadow); }
-        
-        .bg-work { background: #ff4d4d; } 
-        .bg-off { background: #28a745; } 
-        .bg-vacation { background: #ffc107; }
-        .bg-clear { background: #888; }
+        :root {
+            --page-bg: #777777;
+            --header-gold: #ddaa66;
+            --work: #ff453a;
+            --off: #32d74b;
+            --vac: #ffd60a;
+            --github: #24292e;
+        }
 
-        .view-container { display: grid; gap: 25px; width: 100%; max-width: 1150px; justify-content: center; }
-        .month-view { grid-template-columns: 1fr; max-width: 500px; }
-        .year-view { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
-        
-        .month-card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #eee; height: fit-content; position: relative; }
-        .month-title { text-align: center; margin-bottom: 10px; font-size: 1.3em; font-weight: 800; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
-        .work-counter { text-align: center; font-size: 0.8em; color: #666; margin-bottom: 10px; font-weight: bold; }
-        
-        table { width: 100%; border-collapse: separate; border-spacing: 5px; }
-        td { width: 42px; height: 42px; text-align: center; font-weight: 700; background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; cursor: pointer; position: relative; transition: 0.1s; }
-        td:hover:not(.empty) { filter: brightness(0.9); }
-        
-        .holiday-text { font-size: 0.55em; display: block; line-height: 1; font-weight: normal; margin-top: 2px; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--page-bg);
+            margin: 0; padding: 10px;
+            display: flex; flex-direction: column; align-items: center;
+            user-select: none;
+            touch-action: pan-y;
+        }
 
-        .today { border: 3px solid var(--today-border) !important; box-shadow: 0 0 10px rgba(0,123,255,0.5); animation: pulse 2s infinite; z-index: 5; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        /* --- TOOLBAR --- */
+        .toolbar {
+            display: flex; gap: 8px; margin-bottom: 15px; background: #ffffff;
+            padding: 10px; border-radius: 12px; border: 2px solid #444;
+            flex-wrap: wrap; justify-content: center; align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); position: sticky; top: 5px; z-index: 1000;
+            width: 95%; max-width: 900px;
+        }
 
-        .has-note::after { content: ""; position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: #000; border-radius: 50%; border: 1px solid #fff; z-index: 2; }
-        .holiday { background-color: #fff0f0 !important; color: #d32f2f !important; border: 2px solid #ffcdd2 !important; }
-        
-        .work { background: #ff4d4d !important; color: white !important; }
-        .day-off { background: #28a745 !important; color: white !important; }
-        .vacation { background: #ffc107 !important; color: black !important; }
-        .empty { border: none !important; background: transparent !important; cursor: default; }
+        .btn {
+            padding: 8px 12px; font-weight: bold; text-transform: uppercase;
+            border-radius: 6px; border: 1px solid #ccc; cursor: pointer;
+            background: #fff; font-size: 10px; display: flex; align-items: center; gap: 4px;
+        }
+        .btn.active { border: 2px solid #000; background: #eee; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-github { background: var(--github); color: white; border: none; padding: 8px 15px; }
+        .btn-save { background: #000; color: white; border: none; padding: 8px 15px; }
 
-        .notes-list-panel { background: white; width: 100%; max-width: 1000px; margin-top: 30px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-left: 8px solid #333; }
-        .note-item { display: grid; grid-template-columns: 140px 1fr; gap: 15px; padding: 12px; border-bottom: 1px solid #eee; align-items: center; }
-        .note-date { font-weight: 800; color: var(--primary); }
-        .holiday-note { color: #d32f2f; font-style: italic; font-weight: bold; }
-        .směna-info { font-size: 0.9em; color: #555; background: #eee; padding: 2px 6px; border-radius: 4px; margin-left: 10px; }
-        
-        .save-panel { background: #e8f4fd; padding: 20px; border-radius: 15px; margin-top: 20px; width: 100%; max-width: 1000px; text-align: center; display: flex; flex-direction: column; gap: 10px; align-items: center; }
-        .btn { border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; font-family: inherit; }
-        .btn-nav { background: var(--primary); color: white; }
-        .btn-green { background: #28a745; color: white; box-shadow: 0 4px 0 #1e7e34; }
-        .btn-blue { background: #007BFF; color: white; box-shadow: 0 4px 0 #0056b3; }
-        .btn-red { background: #dc3545; color: white; }
+        .dot { width: 12px; height: 12px; border-radius: 3px; }
+        #drawStatus { background: #d00; color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; visibility: hidden; }
+        #drawStatus.visible { visibility: visible; }
+
+        /* --- KALENDÁŘ --- */
+        .calendar-container { display: grid; gap: 15px; width: 100%; max-width: 1400px; }
+        .view-year { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+        .view-month { grid-template-columns: 1fr; max-width: 800px; }
+
+        .month-caption {
+            background-color: var(--header-gold); color: #000; font-size: 1.1rem; font-weight: bold;
+            padding: 10px; border-radius: 12px 12px 0 0; border: 2px solid #444;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        table.cal {
+            border: 2px solid #444; border-radius: 0 0 12px 12px; background-color: #eeeeee;
+            width: 100%; border-collapse: separate; border-spacing: 3px; padding: 4px;
+        }
+
+        .cal th { color: #666; font-size: 9px; text-transform: uppercase; padding: 3px 0; }
+        .cal td {
+            width: 13%; height: 50px; vertical-align: middle; font-weight: 900; text-align: center;
+            border: 1px solid #bbb; background: #fff; border-radius: 6px; position: relative;
+            cursor: pointer; font-size: 1.1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            color: #000 !important;
+        }
+
+        .cal td.week-num { background: #ddd !important; color: #777 !important; font-size: 9px; cursor: default; border: none; box-shadow: none; }
+        .cal td.weekend { background-color: #ffffcc !important; }
+        .cal td.prace { background-color: var(--work) !important; }
+        .cal td.volno { background-color: var(--off) !important; }
+        .cal td.dovolena { background-color: var(--vac) !important; }
+        .cal td.empty { background: transparent !important; border: none !important; box-shadow: none !important; }
+        .cal td.today { border: 3px solid #000 !important; }
+
+        .note-marker { position: absolute; top: 2px; left: 2px; font-size: 10px; }
+        .holiday-label { position: absolute; bottom: 1px; left: 1px; right: 1px; background: rgba(255,255,255,0.7); color: #800; font-size: 7px; border-radius: 3px; pointer-events: none; }
+
+        /* --- GITHUB MODAL --- */
+        #githubConfig {
+            background: white; padding: 20px; border-radius: 12px; border: 2px solid #444;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 2000; display: none; width: 90%; max-width: 400px;
+        }
+        #githubConfig input { width: 100%; margin: 5px 0 15px 0; padding: 8px; box-sizing: border-box; }
+
+        /* --- FOOTER --- */
+        .footer { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 1200px; }
+        .info-card { background: white; padding: 15px; border-radius: 12px; border: 2px solid #444; }
+        @media (max-width: 650px) { .footer { grid-template-columns: 1fr; } }
+        .row-item { display: flex; justify-content: space-between; align-items: center; padding: 6px; border-bottom: 1px solid #eee; font-size: 12px; }
+        .btn-action { padding: 4px 6px; font-size: 10px; cursor: pointer; border-radius: 4px; border: 1px solid #ccc; background: #fff; }
     </style>
 </head>
-<body onmouseup="stopDrawing()" onmouseleave="stopDrawing()">
+<body onmouseup="stopDrawing()" ontouchend="stopDrawing()">
 
-    <div class="controls-panel">
-        <div class="nav-section">
-            <button class="btn btn-nav" onclick="navigate(-1)">❮</button>
-            <span id="displayLabel" class="display-label">2026</span>
-            <button class="btn btn-nav" onclick="navigate(1)">❯</button>
-        </div>
-        <div class="tools">
-            <div class="tool active" id="tool-work" onclick="setTool('work', this)"><div class="dot bg-work"></div>Práce</div>
-            <div class="tool" onclick="setTool('day-off', this)"><div class="dot bg-off"></div>Volno</div>
-            <div class="tool" onclick="setTool('vacation', this)"><div class="dot bg-vacation"></div>Dovolená</div>
-            <div class="tool" onclick="setTool('clear', this)"><div class="dot bg-clear"></div>Smazat</div>
-        </div>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <button class="btn" style="background:#6c757d; color:white;" id="viewToggle" onclick="toggleView()">Měsíční pohled</button>
-            <button class="btn btn-red" onclick="window.print()">Tisk / PDF</button>
-        </div>
+    <div class="toolbar">
+        <h3 id="yearTitle" style="margin: 0 10px;">2026</h3>
+        <button class="btn active" id="viewBtnYear" onclick="setView('year')">Rok</button>
+        <button class="btn" id="viewBtnMonth" onclick="setView('month')">Měsíc</button>
+        <div style="width: 1px; height: 20px; background: #ccc; margin: 0 5px;"></div>
+        
+        <button class="btn active" id="t-prace" onclick="setTool('prace')"><div class="dot" style="background:var(--work)"></div> Práce</button>
+        <button class="btn" id="t-volno" onclick="setTool('volno')"><div class="dot" style="background:var(--off)"></div> Volno</button>
+        <button class="btn" id="t-dovolena" onclick="setTool('dovolena')"><div class="dot" style="background:var(--vac)"></div> Dovčat</button>
+        <button class="btn" id="t-clear" onclick="setTool('clear')">Smazat</button>
+
+        <button class="btn btn-github" onclick="document.getElementById('githubConfig').style.display='block'">⚙ GitHub</button>
+        <button class="btn btn-save" onclick="syncToGithub()">Uložit na GitHub</button>
+        <span id="drawStatus">REŽIM KRESLENÍ</span>
     </div>
 
-    <div id="calendarContainer" class="view-container year-view"></div>
-
-    <div class="notes-list-panel">
-        <h2 style="margin-top:0;">📝 Poznámky a svátky 2026</h2>
-        <div id="notesContainer"></div>
+    <div id="githubConfig">
+        <h4>Nastavení synchronizace</h4>
+        <label>GitHub Token (PAT):</label>
+        <input type="password" id="ghToken" placeholder="ghp_xxxx...">
+        <label>Uživatel / Repozitář:</label>
+        <input type="text" id="ghRepo" placeholder="uzivatel/planovac">
+        <label>Cesta k souboru (např. index.html):</label>
+        <input type="text" id="ghPath" value="index.html">
+        <button class="btn btn-save" style="width:100%" onclick="saveGhConfig()">Uložit nastavení</button>
+        <button class="btn" style="width:100%; margin-top:5px;" onclick="document.getElementById('githubConfig').style.display='none'">Zavřít</button>
     </div>
 
-    <div class="save-panel">
-        <button class="btn btn-blue" onclick="copyCodeToClipboard()">ZKOPÍROVAT KÓD PRO GITHUB</button>
-        <span id="copyStatus" style="font-size: 0.9em; color: #28a745; font-weight: bold;"></span>
-        <button class="btn btn-green" onclick="saveToDisk()">STÁHNOUT JAKO SOUBOR</button>
+    <div id="calendarContainer" class="calendar-container view-year"></div>
+
+    <div class="footer">
+        <div class="info-card"><h4>✎ POZNÁMKY</h4><div id="notesList"></div></div>
+        <div class="info-card"><h4>🇨🇿 SVÁTKY</h4><div id="holidaysList"></div></div>
     </div>
 
-    <script id="embeddedData" type="application/json">{"d-2026-0-9":"day-off","d-2026-0-10":"day-off","d-2026-0-11":"day-off","d-2026-0-12":"day-off","d-2026-0-13":"work","d-2026-0-14":"work","d-2026-0-15":"work","d-2026-0-16":"work","d-2026-0-17":"work","d-2026-0-18":"work","d-2026-0-19":"work","d-2026-0-20":"work","d-2026-0-21":"day-off","d-2026-0-22":"day-off","d-2026-0-23":"day-off","d-2026-0-24":"day-off","d-2026-0-25":"day-off","d-2026-0-26":"day-off","d-2026-0-27":"work","d-2026-0-28":"work","d-2026-0-29":"work","d-2026-0-30":"work","d-2026-0-31":"work","d-2026-1-2":"work","d-2026-1-3":"work","d-2026-1-4":"day-off","d-2026-1-1":"work","d-2026-1-5":"day-off","d-2026-1-6":"day-off","d-2026-1-7":"day-off","d-2026-1-8":"day-off","d-2026-1-9":"day-off","d-2026-1-10":"work","d-2026-1-11":"work","d-2026-1-12":"work","d-2026-1-13":"work","d-2026-1-14":"work","d-2026-1-15":"work","d-2026-1-16":"work","d-2026-1-17":"work","d-2026-1-18":"day-off","d-2026-1-19":"day-off","d-2026-1-20":"day-off","d-2026-1-21":"day-off","d-2026-1-22":"day-off","d-2026-1-23":"day-off","d-2026-1-24":"work","d-2026-1-25":"work","d-2026-1-26":"work","d-2026-1-27":"work","d-2026-1-28":"work","d-2026-2-1":"work","d-2026-2-2":"work","d-2026-2-3":"work","d-2026-2-4":"day-off","d-2026-2-5":"day-off","d-2026-2-6":"day-off","d-2026-2-7":"day-off","d-2026-2-8":"day-off","d-2026-2-9":"day-off","d-2026-2-10":"work","d-2026-2-11":"work","d-2026-2-12":"work","d-2026-2-13":"work","d-2026-2-14":"work","d-2026-2-15":"work","d-2026-2-16":"work","d-2026-2-17":"work","d-2026-2-18":"day-off","d-2026-2-19":"day-off","d-2026-2-20":"day-off","d-2026-2-21":"day-off","d-2026-2-22":"day-off","d-2026-2-23":"day-off","d-2026-2-24":"work","d-2026-2-25":"work","d-2026-2-26":"work","d-2026-2-27":"work","d-2026-2-28":"work","d-2026-3-1":"day-off","d-2026-3-2":"day-off","d-2026-3-3":"day-off","d-2026-3-4":"day-off","d-2026-3-5":"day-off","d-2026-3-6":"day-off","d-2026-3-7":"work","d-2026-3-8":"work","d-2026-3-9":"work","d-2026-3-10":"work","d-2026-3-11":"work","d-2026-3-12":"work","d-2026-3-13":"work","d-2026-3-14":"work","d-2026-3-15":"day-off","d-2026-3-16":"day-off","d-2026-3-17":"day-off","d-2026-3-18":"day-off","d-2026-3-19":"day-off","d-2026-3-20":"day-off","d-2026-3-21":"work","d-2026-3-22":"work","d-2026-3-23":"work","d-2026-3-24":"work","d-2026-3-25":"work","d-2026-3-26":"work","d-2026-3-27":"work","d-2026-3-28":"work","d-2026-3-29":"day-off","d-2026-3-30":"day-off","d-2026-3-31":"day-off","d-2026-4-1":"day-off","d-2026-4-2":"day-off","d-2026-4-3":"day-off","note-d-2026-0-9":"krev Semily objednat srdce, objednat ocní"}</script>
+    <script id="embeddedData" type="application/json">
+        {"d-2026-0-9":"volno","d-2026-0-10":"volno","d-2026-0-11":"volno","d-2026-0-12":"volno","d-2026-0-13":"prace","d-2026-0-14":"prace","d-2026-0-15":"prace","d-2026-0-16":"prace","d-2026-0-17":"prace","d-2026-0-18":"prace","d-2026-0-19":"prace","d-2026-0-20":"prace","d-2026-0-21":"volno","d-2026-0-22":"volno","d-2026-0-23":"volno","d-2026-0-24":"volno","d-2026-0-25":"volno","d-2026-0-26":"volno","d-2026-0-27":"prace","d-2026-0-28":"prace","d-2026-0-29":"prace","d-2026-0-30":"prace","d-2026-0-31":"prace","d-2026-1-2":"prace","d-2026-1-3":"prace","d-2026-1-4":"volno","d-2026-1-1":"prace","d-2026-1-5":"volno","d-2026-1-6":"volno","d-2026-1-7":"volno","d-2026-1-8":"volno","d-2026-1-9":"volno","d-2026-1-10":"prace","d-2026-1-11":"prace","d-2026-1-12":"prace","d-2026-1-13":"prace","d-2026-1-14":"prace","d-2026-1-15":"prace","d-2026-1-16":"prace","d-2026-1-17":"prace","d-2026-1-18":"volno","d-2026-1-19":"volno","d-2026-1-20":"volno","d-2026-1-21":"volno","d-2026-1-22":"volno","d-2026-1-23":"volno","d-2026-1-24":"prace","d-2026-1-25":"prace","d-2026-1-26":"prace","d-2026-1-27":"prace","d-2026-1-28":"prace","d-2026-2-1":"prace","d-2026-2-2":"prace","d-2026-2-3":"prace","d-2026-2-4":"volno","d-2026-2-5":"volno","d-2026-2-6":"volno","d-2026-2-7":"volno","d-2026-2-8":"volno","d-2026-2-9":"volno","d-2026-2-10":"prace","d-2026-2-11":"prace","d-2026-2-12":"prace","d-2026-2-13":"prace","d-2026-2-14":"prace","d-2026-2-15":"prace","d-2026-2-16":"prace","d-2026-2-17":"prace","d-2026-2-18":"volno","d-2026-2-19":"volno","d-2026-2-20":"volno","d-2026-2-21":"volno","d-2026-2-22":"volno","d-2026-2-23":"volno","d-2026-2-24":"prace","d-2026-2-25":"prace","d-2026-2-26":"prace","d-2026-2-27":"prace","d-2026-2-28":"prace","d-2026-3-1":"volno","d-2026-3-2":"volno","d-2026-3-3":"volno","d-2026-3-4":"volno","d-2026-3-5":"volno","d-2026-3-6":"volno","d-2026-3-7":"prace","d-2026-3-8":"prace","d-2026-3-9":"prace","d-2026-3-10":"prace","d-2026-3-11":"prace","d-2026-3-12":"prace","d-2026-3-13":"prace","d-2026-3-14":"prace","d-2026-3-15":"volno","d-2026-3-16":"volno","d-2026-3-17":"volno","d-2026-3-18":"volno","d-2026-3-19":"volno","d-2026-3-20":"volno","d-2026-3-21":"prace","d-2026-3-22":"prace","d-2026-3-23":"prace","d-2026-3-24":"prace","d-2026-3-25":"prace","d-2026-3-26":"prace","d-2026-3-27":"prace","d-2026-3-28":"prace","d-2026-3-29":"volno","d-2026-3-30":"volno","d-2026-4-5":"prace","d-2026-4-6":"prace","d-2026-4-7":"prace","d-2026-4-8":"prace","d-2026-4-9":"prace","d-2026-4-10":"prace","d-2026-4-11":"prace","d-2026-4-12":"prace","d-2026-4-19":"prace","d-2026-4-20":"prace","d-2026-4-21":"prace","d-2026-4-22":"prace","d-2026-4-23":"prace","d-2026-4-24":"prace","d-2026-4-25":"prace","d-2026-4-26":"prace","d-2026-5-2":"prace","d-2026-5-3":"prace","d-2026-5-4":"prace","d-2026-5-5":"prace","d-2026-5-6":"prace","d-2026-5-7":"prace","d-2026-5-8":"prace","d-2026-5-9":"prace","d-2026-5-16":"prace","d-2026-5-17":"prace","d-2026-5-18":"prace","d-2026-5-19":"prace","d-2026-5-20":"prace","d-2026-5-21":"prace","d-2026-5-22":"prace","d-2026-5-23":"prace","d-2026-5-30":"prace","d-2026-6-1":"prace","d-2026-6-2":"prace","d-2026-6-3":"prace","d-2026-6-4":"prace","d-2026-6-5":"prace","d-2026-6-6":"prace","d-2026-6-7":"prace","d-2026-6-14":"prace","d-2026-6-15":"prace","d-2026-6-16":"prace","d-2026-6-17":"prace","d-2026-6-18":"prace","d-2026-6-19":"prace","d-2026-6-20":"prace","d-2026-6-21":"prace","d-2026-6-28":"prace","d-2026-6-29":"prace","d-2026-6-30":"prace","d-2026-7-1":"prace","d-2026-7-2":"prace","d-2026-7-3":"prace","d-2026-7-4":"prace","d-2026-7-11":"prace","d-2026-7-12":"prace","d-2026-7-13":"prace","d-2026-7-14":"prace","d-2026-7-15":"prace","d-2026-7-16":"prace","d-2026-7-17":"prace","d-2026-7-18":"prace","d-2026-7-25":"prace","d-2026-7-26":"prace","d-2026-7-27":"prace","d-2026-7-28":"prace","d-2026-7-29":"prace","d-2026-7-30":"prace","d-2026-7-31":"prace","d-2026-8-1":"prace","d-2026-8-8":"prace","d-2026-8-9":"prace","d-2026-8-10":"prace","d-2026-8-11":"prace","d-2026-8-12":"prace","d-2026-8-13":"prace","d-2026-8-14":"prace","d-2026-8-15":"prace","d-2026-8-22":"prace","d-2026-8-23":"prace","d-2026-8-24":"prace","d-2026-8-25":"prace","d-2026-8-26":"prace","d-2026-8-27":"prace","d-2026-8-28":"prace","d-2026-8-29":"prace","d-2026-9-6":"prace","d-2026-9-7":"prace","d-2026-9-8":"prace","d-2026-9-9":"prace","d-2026-9-10":"prace","d-2026-9-11":"prace","d-2026-9-12":"prace","d-2026-9-13":"prace","d-2026-9-20":"prace","d-2026-9-21":"prace","d-2026-9-22":"prace","d-2026-9-23":"prace","d-2026-9-24":"prace","d-2026-9-25":"prace","d-2026-9-26":"prace","d-2026-9-27":"prace","d-2026-10-3":"prace","d-2026-10-4":"prace","d-2026-10-5":"prace","d-2026-10-6":"prace","d-2026-10-7":"prace","d-2026-10-8":"prace","d-2026-10-9":"prace","d-2026-10-10":"prace","d-2026-10-17":"prace","d-2026-10-18":"prace","d-2026-10-19":"prace","d-2026-10-20":"prace","d-2026-10-21":"prace","d-2026-10-22":"prace","d-2026-10-23":"prace","d-2026-10-24":"prace","d-2026-11-1":"prace","d-2026-11-2":"prace","d-2026-11-3":"prace","d-2026-11-4":"prace","d-2026-11-5":"prace","d-2026-11-6":"prace","d-2026-11-7":"prace","d-2026-11-8":"prace","d-2026-11-15":"prace","d-2026-11-16":"prace","d-2026-11-17":"prace","d-2026-11-18":"prace","d-2026-11-19":"prace","d-2026-11-20":"prace","d-2026-11-21":"prace","d-2026-11-22":"prace","d-2026-11-29":"prace","d-2026-11-30":"prace","note-d-2026-0-9":"krev Semily objednat srdce, objednat ocní","note-d-2026-9-8":"Jáša Trucková v 10h","d-2026-4-1":"volno","d-2026-4-2":"volno","d-2026-4-3":"volno","d-2026-4-4":"volno","d-2026-4-13":"volno","d-2026-4-14":"volno","d-2026-4-15":"volno","d-2026-4-16":"volno","d-2026-4-17":"volno","d-2026-4-18":"volno","d-2026-4-27":"volno","d-2026-4-28":"volno","d-2026-4-29":"volno","d-2026-4-30":"volno","d-2026-4-31":"volno","d-2026-5-1":"volno","d-2026-5-10":"volno","d-2026-5-11":"volno","d-2026-5-12":"volno","d-2026-5-13":"volno","d-2026-5-14":"volno","d-2026-5-15":"volno","d-2026-5-24":"volno","d-2026-5-25":"volno","d-2026-5-26":"volno","d-2026-5-27":"volno","d-2026-5-28":"volno","d-2026-5-29":"volno","d-2026-6-8":"volno","d-2026-6-9":"volno","d-2026-6-10":"volno","d-2026-6-22":"volno","d-2026-6-23":"volno","d-2026-6-24":"volno","d-2026-6-25":"volno","d-2026-6-26":"volno","d-2026-6-11":"volno","d-2026-6-12":"volno","d-2026-6-13":"volno","d-2026-6-31":"volno","d-2026-6-27":"volno","d-2026-7-5":"volno","d-2026-7-6":"volno","d-2026-7-7":"volno","d-2026-7-8":"volno","d-2026-7-9":"volno","d-2026-7-19":"volno","d-2026-7-20":"volno","d-2026-7-21":"volno","d-2026-7-22":"volno","d-2026-7-23":"volno","d-2026-7-10":"volno","d-2026-7-24":"volno","d-2026-8-2":"volno","d-2026-8-3":"volno","d-2026-8-4":"volno","d-2026-8-5":"volno","d-2026-8-6":"volno","d-2026-8-7":"volno","d-2026-8-16":"volno","d-2026-8-17":"volno","d-2026-8-18":"volno","d-2026-8-19":"volno","d-2026-8-20":"volno","d-2026-8-21":"volno","d-2026-8-30":"volno","d-2026-9-1":"volno","d-2026-9-2":"volno","d-2026-9-3":"volno","d-2026-9-4":"volno","d-2026-9-5":"volno","d-2026-9-14":"volno","d-2026-9-15":"volno","d-2026-9-16":"volno","d-2026-9-17":"volno","d-2026-9-18":"volno","d-2026-9-19":"volno","d-2026-9-28":"volno","d-2026-9-29":"volno","d-2026-9-30":"volno","d-2026-9-31":"volno","d-2026-10-1":"volno","d-2026-10-2":"volno","d-2026-10-11":"volno","d-2026-10-12":"volno","d-2026-10-13":"volno","d-2026-10-14":"volno","d-2026-10-15":"volno","d-2026-10-16":"volno","d-2026-10-25":"volno","d-2026-10-26":"volno","d-2026-10-27":"volno","d-2026-10-28":"volno","d-2026-10-29":"volno","d-2026-10-30":"volno","d-2026-11-9":"volno","d-2026-11-10":"volno","d-2026-11-11":"volno","d-2026-11-12":"volno","d-2026-11-13":"volno","d-2026-11-14":"volno","d-2026-11-23":"volno","d-2026-11-24":"volno","d-2026-11-25":"volno","d-2026-11-26":"volno","d-2026-11-27":"volno","d-2026-11-28":"volno","d-2026-11-31":"volno"}
+    </script>
 
     <script>
-        let storage = {};
-        try { storage = JSON.parse(document.getElementById('embeddedData').textContent || '{}'); } catch(e) { storage = {}; }
-
-        let currentDate = new Date(2026, 0, 1);
-        let currentTool = 'work';
+        let storage = JSON.parse(document.getElementById('embeddedData').textContent || '{}');
+        let currentYear = 2026;
+        let currentTool = 'prace';
         let isDrawing = false;
-        let isYearView = true;
+        let currentView = 'year';
+        let displayedMonth = new Date().getMonth();
+
         const months = ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
-        const holidays = {"1-0": "Nový rok", "3-3": "Velký pátek", "6-3": "Velikonoce", "1-4": "Svátek práce", "8-4": "Den vítězství", "5-6": "Věrozvěsti", "6-6": "Jan Hus", "28-8": "Státnost", "28-9": "Vznik ČSR", "17-10": "Svoboda", "24-11": "Štědrý den", "25-11": "1. svátek", "26-11": "2. svátek"};
-        const toolNames = { "work": "Práce", "day-off": "Volno", "vacation": "Dovolená" };
+        const holidays = {"1-0": "Nový rok", "13-3": "Velký pátek", "16-3": "Velikonoce", "1-4": "Svátek práce", "8-4": "Den vítězství", "5-6": "Cyril a Metoděj", "6-6": "Jan Hus", "28-8": "Sv. Václav", "28-9": "Vznik ČSR", "17-10": "Svoboda", "24-11": "Štědrý den", "25-11": "1. svátek", "26-11": "2. svátek"};
 
-        function setTool(tool, element) {
-            currentTool = tool;
-            document.querySelectorAll('.tool').forEach(t => t.classList.remove('active'));
-            element.classList.add('active');
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+            return Math.ceil((((d - new Date(Date.UTC(d.getUTCFullYear(), 0, 1))) / 86400000) + 1) / 7);
         }
 
-        function stopDrawing() { isDrawing = false; }
-        function navigate(step) { if (isYearView) currentDate.setFullYear(currentDate.getFullYear() + step); else currentDate.setMonth(currentDate.getMonth() + step); render(); }
-        function toggleView() { isYearView = !isYearView; document.getElementById('calendarContainer').className = isYearView ? "view-container year-view" : "view-container month-view"; document.getElementById('viewToggle').textContent = isYearView ? "Měsíční pohled" : "Celý rok"; render(); }
-
-        function applyTool(cell, dayId) {
-            if (currentTool === 'clear') delete storage[dayId]; else storage[dayId] = currentTool;
+        function setView(v) {
+            currentView = v;
+            document.getElementById('viewBtnYear').classList.toggle('active', v === 'year');
+            document.getElementById('viewBtnMonth').classList.toggle('active', v === 'month');
+            document.getElementById('calendarContainer').className = `calendar-container view-${v}`;
             render();
         }
 
-        function addNote(e, dayId, dayNum, monthIdx, year) {
-            e.preventDefault();
-            const newNote = prompt(`Poznámka ${dayNum}. ${months[monthIdx]}:`, storage["note-" + dayId] || "");
-            if (newNote === null) return;
-            if (newNote.trim() === "") delete storage["note-" + dayId]; else storage["note-" + dayId] = newNote;
-            render();
+        function setTool(t) {
+            currentTool = t;
+            ['prace', 'volno', 'dovolena', 'clear'].forEach(tool => {
+                document.getElementById('t-' + tool).classList.toggle('active', t === tool);
+            });
         }
 
-        function createMonthHTML(year, mIdx) {
-            const card = document.createElement('div');
-            card.className = 'month-card';
-            const workDays = Object.keys(storage).filter(k => k.startsWith(`d-${year}-${mIdx}-`) && storage[k] === 'work').length;
-            card.innerHTML = `<h3 class="month-title">${months[mIdx]} ${year}</h3><div class="work-counter">Směn: ${workDays}</div>`;
-            const table = document.createElement('table');
-            table.innerHTML = `<thead><tr><th>Po</th><th>Út</th><th>St</th><th>Čt</th><th>Pá</th><th>So</th><th>Ne</th></tr></thead>`;
-            const tbody = document.createElement('tbody');
-            let start = (new Date(year, mIdx, 1).getDay() || 7) - 1;
-            let days = new Date(year, mIdx + 1, 0).getDate();
-            let d = 1;
-            for (let r = 0; r < 6; r++) {
-                const tr = document.createElement('tr');
-                for (let c = 0; c < 7; c++) {
-                    const cell = document.createElement('td');
-                    if ((r === 0 && c < start) || d > days) { cell.className = 'empty'; } 
-                    else {
-                        const dayId = `d-${year}-${mIdx}-${d}`;
-                        const hol = holidays[`${d}-${mIdx}`];
-                        cell.innerHTML = `<span>${d}</span>${hol ? `<span class="holiday-text">${hol}</span>` : ''}`;
-                        if (storage[dayId]) cell.className = storage[dayId];
-                        if (hol && year === 2026) cell.classList.add('holiday');
-                        if (storage["note-" + dayId]) cell.classList.add('has-note');
-                        const currentD = d;
-                        cell.onmousedown = (e) => { if(e.button === 0) { isDrawing = true; applyTool(cell, dayId); } };
-                        cell.onmouseenter = () => { if(isDrawing) applyTool(cell, dayId); };
-                        cell.oncontextmenu = (e) => addNote(e, dayId, currentD, mIdx, year);
-                        d++;
-                    }
-                    tr.appendChild(cell);
-                }
-                tbody.appendChild(tr); if (d > days) break;
+        function applyTool(id) {
+            if (!isDrawing) return;
+            if (currentTool === 'clear') delete storage[id]; else storage[id] = currentTool;
+            const el = document.getElementById(`cell-${id}`);
+            if (el) {
+                el.className = (currentTool === 'clear') ? '' : currentTool;
+                const d = id.split('-'); if(new Date(d[1], d[2], d[3]).getDay() % 6 === 0) el.classList.add('weekend');
             }
-            table.appendChild(tbody); card.appendChild(table); return card;
+            updateStats();
         }
+
+        function startDrawing(id) { isDrawing = true; document.getElementById('drawStatus').classList.add('visible'); applyTool(id); }
+        function stopDrawing() { isDrawing = false; document.getElementById('drawStatus').classList.remove('visible'); }
 
         function render() {
             const container = document.getElementById('calendarContainer');
-            const notesCont = document.getElementById('notesContainer');
-            container.innerHTML = ''; notesCont.innerHTML = '';
-            const y = currentDate.getFullYear();
-            document.getElementById('displayLabel').textContent = isYearView ? y : months[currentDate.getMonth()] + " " + y;
-            const toShow = isYearView ? [0,1,2,3,4,5,6,7,8,9,10,11] : [currentDate.getMonth()];
-            toShow.forEach(idx => container.appendChild(createMonthHTML(y, idx)));
+            container.innerHTML = '';
+            const startM = currentView === 'year' ? 0 : displayedMonth;
+            const endM = currentView === 'year' ? 12 : displayedMonth + 1;
 
-            const items = [];
-            if (y === 2026) Object.keys(holidays).forEach(h => {
-                const [d, m] = h.split('-').map(Number);
-                const shift = storage[`d-2026-${m}-${d}`] ? toolNames[storage[`d-2026-${m}-${d}`]] : "Volno/Neuvedeno";
-                items.push({ date: new Date(2026, m, d), text: `${holidays[h]} (Máte: ${shift})`, isH: true });
+            for(let m = startM; m < endM; m++) {
+                const wrap = document.createElement('div');
+                wrap.innerHTML = `<div class="month-caption">
+                    ${currentView === 'month' ? `<button class="btn" onclick="displayedMonth=(displayedMonth+11)%12; render();">❮</button>` : ''}
+                    <span>${months[m]} ${currentYear}</span>
+                    ${currentView === 'month' ? `<button class="btn" onclick="displayedMonth=(displayedMonth+1)%12; render();">❯</button>` : ''}
+                    <div id="stats-${m}" style="font-size:10px; background:#fff; padding:2px 8px; border-radius:10px; border:1px solid #444"></div>
+                </div>`;
+
+                const table = document.createElement('table');
+                table.className = 'cal';
+                table.innerHTML = `<tr><th class="week-num-head">T.</th><th>Po</th><th>Út</th><th>St</th><th>Čt</th><th>Pá</th><th>So</th><th>Ne</th></tr>`;
+
+                let firstDay = (new Date(currentYear, m, 1).getDay() || 7) - 1;
+                let daysCount = new Date(currentYear, m + 1, 0).getDate();
+                let day = 1;
+
+                for(let r = 0; r < 6; r++) {
+                    let tr = document.createElement('tr');
+                    let tdW = document.createElement('td'); tdW.className = 'week-num';
+                    if (day <= daysCount) tdW.textContent = getWeekNumber(new Date(currentYear, m, day));
+                    tr.appendChild(tdW);
+
+                    for(let c = 0; c < 7; c++) {
+                        let td = document.createElement('td');
+                        if((r === 0 && c < firstDay) || day > daysCount) { td.className = 'empty'; } else {
+                            const id = `d-${currentYear}-${m}-${day}`;
+                            td.id = `cell-${id}`; td.textContent = day;
+                            if(storage[id]) td.className = storage[id];
+                            if(c >= 5) td.classList.add('weekend');
+                            if(storage["note-"+id]) td.innerHTML += `<span class="note-marker">✎</span>`;
+                            if(holidays[`${day}-${m}`]) td.innerHTML += `<span class="holiday-label">${holidays[`${day}-${m}`]}</span>`;
+
+                            td.addEventListener('mousedown', () => startDrawing(id));
+                            td.addEventListener('mouseover', () => applyTool(id));
+                            td.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(id); });
+                            td.addEventListener('touchmove', (e) => {
+                                e.preventDefault(); let t = e.touches[0];
+                                let el = document.elementFromPoint(t.clientX, t.clientY);
+                                if (el && el.id && el.id.startsWith('cell-d-')) applyTool(el.id.replace('cell-', ''));
+                            });
+                            td.oncontextmenu = (e) => { e.preventDefault(); editNote(id); };
+                            day++;
+                        }
+                        tr.appendChild(td);
+                    }
+                    table.appendChild(tr); if(day > daysCount) break;
+                }
+                wrap.appendChild(table); container.appendChild(wrap);
+            }
+            updateLists(); updateStats();
+        }
+
+        function updateStats() {
+            const startM = currentView === 'year' ? 0 : displayedMonth;
+            const endM = currentView === 'year' ? 12 : displayedMonth + 1;
+            for(let m = startM; m < endM; m++) {
+                const p = Object.keys(storage).filter(k => k.startsWith(`d-${currentYear}-${m}-`) && storage[k] === 'prace').length;
+                const v = Object.keys(storage).filter(k => k.startsWith(`d-${currentYear}-${m}-`) && storage[k] === 'volno').length;
+                const statEl = document.getElementById(`stats-${m}`);
+                if (statEl) statEl.innerText = `P: ${p} | V: ${v}`;
+            }
+        }
+
+        function editNote(id) {
+            const val = prompt(`Poznámka:`, storage["note-"+id] || "");
+            if(val !== null) { if(val.trim()==="") delete storage["note-"+id]; else storage["note-"+id]=val; render(); }
+        }
+
+        function updateLists() {
+            const nList = document.getElementById('notesList'); nList.innerHTML = '';
+            Object.keys(storage).filter(k => k.startsWith('note-d-')).sort().forEach(k => {
+                const [,, y, m, d] = k.split('-');
+                const row = document.createElement('div'); row.className = 'row-item';
+                row.innerHTML = `<b>${d}.${parseInt(m)+1}.</b> <span style="flex:1; margin-left:10px">${storage[k]}</span><button class="btn-action" onclick="editNote('${y}-${m}-${d}')">✎</button>`;
+                nList.appendChild(row);
             });
-            Object.keys(storage).filter(k => k.startsWith('note-d-')).forEach(k => {
-                const p = k.split('-'); items.push({ date: new Date(p[2], p[3], p[4]), text: storage[k], isH: false });
-            });
-            items.sort((a,b) => a.date - b.date).forEach(item => {
-                const div = document.createElement('div'); div.className = 'note-item';
-                div.innerHTML = `<span class="note-date">${item.date.getDate()}. ${months[item.date.getMonth()]}</span><span class="${item.isH ? 'holiday-note' : ''}">${item.text}</span>`;
-                notesCont.appendChild(div);
+            const hList = document.getElementById('holidaysList'); hList.innerHTML = '';
+            Object.keys(holidays).forEach(k => {
+                const [d, m] = k.split('-');
+                const row = document.createElement('div'); row.className = 'row-item';
+                row.innerHTML = `<span>${d}.${parseInt(m)+1}.</span> <span style="flex:1; margin-left:10px">${holidays[k]}</span>`;
+                hList.appendChild(row);
             });
         }
 
-        function generateHTML() {
-            const data = JSON.stringify(storage);
+        // --- GITHUB SYNC LOGIC ---
+        function saveGhConfig() {
+            localStorage.setItem('gh_token', document.getElementById('ghToken').value);
+            localStorage.setItem('gh_repo', document.getElementById('ghRepo').value);
+            localStorage.setItem('gh_path', document.getElementById('ghPath').value);
+            document.getElementById('githubConfig').style.display='none';
+            alert("Nastavení uloženo do prohlížeče.");
+        }
+
+        async function syncToGithub() {
+            const token = localStorage.getItem('gh_token');
+            const repo = localStorage.getItem('gh_repo');
+            const path = localStorage.getItem('gh_path') || 'index.html';
+
+            if(!token || !repo) { alert("Nejdříve vyplňte nastavení GitHubu!"); return; }
+
+            const dataStr = JSON.stringify(storage);
             let html = document.documentElement.outerHTML;
-            return '<!DOCTYPE html>\n' + html.replace(/<script id="embeddedData".*?<\/script>/s, `<script id="embeddedData" type="application\/json">${data}<\/script>`);
+            const newContent = '<!DOCTYPE html>\n' + html.replace(/<script id="embeddedData".*?<\/script>/s, `<script id="embeddedData" type="application\/json">${dataStr}<\/script>`);
+
+            try {
+                // 1. Získat aktuální soubor (potřebujeme jeho SHA)
+                const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+                const res = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
+                const fileData = await res.json();
+                const sha = fileData.sha;
+
+                // 2. Odeslat aktualizaci
+                const updateRes = await fetch(url, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: "Aktualizace plánu",
+                        content: btoa(unescape(encodeURIComponent(newContent))),
+                        sha: sha
+                    })
+                });
+
+                if(updateRes.ok) alert("✅ Plán úspěšně uložen na GitHub!");
+                else alert("❌ Chyba při ukládání: " + updateRes.statusText);
+            } catch (e) {
+                alert("❌ Chyba spojení: " + e.message);
+            }
         }
 
-        function copyCodeToClipboard() {
-            navigator.clipboard.writeText(generateHTML()).then(() => {
-                const s = document.getElementById('copyStatus'); s.textContent = "ZKOPÍROVÁNO! Nyní vložte na GitHub.";
-                setTimeout(() => s.textContent = "", 4000);
-            });
+        // Načtení nastavení z localStorage při startu
+        window.onload = () => {
+            document.getElementById('ghToken').value = localStorage.getItem('gh_token') || '';
+            document.getElementById('ghRepo').value = localStorage.getItem('gh_repo') || '';
+            document.getElementById('ghPath').value = localStorage.getItem('gh_path') || 'index.html';
+            render();
         }
-
-        function saveToDisk() {
-            const blob = new Blob([generateHTML()], {type: 'text/html'});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'planovac_2026.html'; a.click();
-        }
-
-        render();
     </script>
 </body>
 </html>
