@@ -34,7 +34,6 @@
         td { width: 42px; height: 42px; text-align: center; font-weight: 700; background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; cursor: pointer; position: relative; transition: 0.1s; }
         td:hover:not(.empty) { filter: brightness(0.9); }
         
-        /* Styl pro text svátku v kalendáři */
         .holiday-text { font-size: 0.55em; display: block; line-height: 1; font-weight: normal; margin-top: 2px; }
 
         .today { border: 3px solid var(--today-border) !important; box-shadow: 0 0 10px rgba(0,123,255,0.5); animation: pulse 2s infinite; z-index: 5; }
@@ -54,18 +53,11 @@
         .holiday-note { color: #d32f2f; font-style: italic; font-weight: bold; }
         .směna-info { font-size: 0.9em; color: #555; background: #eee; padding: 2px 6px; border-radius: 4px; margin-left: 10px; }
         
-        @media print {
-            .controls-panel, .save-panel, .hint { display: none !important; }
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            body { background: white; padding: 0; }
-            .month-card { box-shadow: none !important; border: 1px solid #ddd; break-inside: avoid; margin-bottom: 20px; }
-            .view-container { display: block; }
-        }
-
-        .save-panel { background: #e8f4fd; padding: 20px; border-radius: 15px; margin-top: 20px; width: 100%; max-width: 1000px; text-align: center; border: 2px solid #b3d7ff; }
+        .save-panel { background: #e8f4fd; padding: 20px; border-radius: 15px; margin-top: 20px; width: 100%; max-width: 1000px; text-align: center; display: flex; flex-direction: column; gap: 10px; align-items: center; }
         .btn { border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; font-family: inherit; }
         .btn-nav { background: var(--primary); color: white; }
         .btn-green { background: #28a745; color: white; box-shadow: 0 4px 0 #1e7e34; }
+        .btn-blue { background: #007BFF; color: white; box-shadow: 0 4px 0 #0056b3; }
         .btn-red { background: #dc3545; color: white; }
     </style>
 </head>
@@ -92,37 +84,28 @@
     <div id="calendarContainer" class="view-container year-view"></div>
 
     <div class="notes-list-panel">
-        <h2 style="margin-top:0;">📝 Seznam poznámek a svátků</h2>
+        <h2 style="margin-top:0;">📝 Poznámky a svátky 2026</h2>
         <div id="notesContainer"></div>
     </div>
 
     <div class="save-panel">
-        <button class="btn btn-green" onclick="saveToDisk()">STÁHNOUT AKTUÁLNÍ PLÁNOVAČ</button>
+        <button class="btn btn-blue" onclick="copyCodeToClipboard()">ZKOPÍROVAT KÓD PRO GITHUB</button>
+        <span id="copyStatus" style="font-size: 0.9em; color: #28a745; font-weight: bold;"></span>
+        <button class="btn btn-green" onclick="saveToDisk()">STÁHNOUT JAKO SOUBOR</button>
     </div>
 
-    <script id="embeddedData" type="application/json">{"d-2026-0-9":"day-off","d-2026-0-10":"day-off","d-2026-0-11":"day-off","d-2026-0-12":"day-off","d-2026-0-13":"work","d-2026-0-14":"work","d-2026-0-15":"work","d-2026-0-16":"work","d-2026-0-17":"work","d-2026-0-18":"work","d-2026-0-19":"work","d-2026-0-20":"work","d-2026-0-21":"day-off","d-2026-0-22":"day-off","d-2026-0-23":"day-off","d-2026-0-24":"day-off","d-2026-0-25":"day-off","d-2026-0-26":"day-off","d-2026-0-27":"work","d-2026-0-28":"work","d-2026-0-29":"work","d-2026-0-30":"work","d-2026-0-31":"work","d-2026-1-2":"work","d-2026-1-3":"work","d-2026-1-4":"day-off","d-2026-1-1":"work","d-2026-1-5":"day-off","d-2026-1-6":"day-off","d-2026-1-7":"day-off","d-2026-1-8":"day-off","d-2026-1-9":"day-off","d-2026-1-10":"work","d-2026-1-11":"work","d-2026-1-12":"work","d-2026-1-13":"work","d-2026-1-14":"work","d-2026-1-15":"work","d-2026-1-16":"work","d-2026-1-17":"work","d-2026-1-18":"day-off","d-2026-1-19":"day-off","d-2026-1-20":"day-off","d-2026-1-21":"day-off","d-2026-1-22":"day-off","d-2026-1-23":"day-off","d-2026-1-24":"work","d-2026-1-25":"work","d-2026-1-26":"work","d-2026-1-27":"work","d-2026-1-28":"work","d-2026-2-1":"work","d-2026-2-2":"work","d-2026-2-3":"work","d-2026-2-4":"day-off","d-2026-2-5":"day-off","d-2026-2-6":"day-off","d-2026-2-7":"day-off","d-2026-2-8":"day-off","d-2026-2-9":"day-off","d-2026-2-10":"work","d-2026-2-11":"work","d-2026-2-12":"work","d-2026-2-13":"work","d-2026-2-14":"work","d-2026-2-15":"work","d-2026-2-16":"work","d-2026-2-17":"work","d-2026-2-18":"day-off","d-2026-2-19":"day-off","d-2026-2-20":"day-off","d-2026-2-21":"day-off","d-2026-2-22":"day-off","d-2026-2-23":"day-off","d-2026-2-24":"work","d-2026-2-25":"work","d-2026-2-26":"work","d-2026-2-27":"work","d-2026-2-28":"work","d-2026-3-1":"day-off","d-2026-3-2":"day-off","d-2026-3-3":"day-off","d-2026-3-4":"day-off","d-2026-3-5":"day-off","d-2026-3-6":"day-off","d-2026-3-7":"work","d-2026-3-8":"work","d-2026-3-9":"work","d-2026-3-10":"work","d-2026-3-11":"work","d-2026-3-12":"work","d-2026-3-13":"work","d-2026-3-14":"work","d-2026-3-15":"day-off","d-2026-3-16":"day-off","d-2026-3-17":"day-off","d-2026-3-18":"day-off","d-2026-3-19":"day-off","d-2026-3-20":"day-off","d-2026-3-21":"work","d-2026-3-22":"work","d-2026-3-23":"work","d-2026-3-24":"work","d-2026-3-25":"work","d-2026-3-26":"work","d-2026-3-27":"work","d-2026-3-28":"work","d-2026-3-29":"day-off","d-2026-3-30":"day-off","d-2026-4-5":"work","d-2026-4-6":"work","d-2026-4-7":"work","d-2026-4-8":"work","d-2026-4-9":"work","d-2026-4-10":"work","d-2026-4-11":"work","d-2026-4-12":"work","d-2026-4-19":"work","d-2026-4-20":"work","d-2026-4-21":"work","d-2026-4-22":"work","d-2026-4-23":"work","d-2026-4-24":"work","d-2026-4-25":"work","d-2026-4-26":"work","d-2026-5-2":"work","d-2026-5-3":"work","d-2026-5-4":"work","d-2026-5-5":"work","d-2026-5-6":"work","d-2026-5-7":"work","d-2026-5-8":"work","d-2026-5-9":"work","d-2026-5-16":"work","d-2026-5-17":"work","d-2026-5-18":"work","d-2026-5-19":"work","d-2026-5-20":"work","d-2026-5-21":"work","d-2026-5-22":"work","d-2026-5-23":"work","d-2026-5-30":"work","d-2026-6-1":"work","d-2026-6-2":"work","d-2026-6-3":"work","d-2026-6-4":"work","d-2026-6-5":"work","d-2026-6-6":"work","d-2026-6-7":"work","d-2026-6-14":"work","d-2026-6-15":"work","d-2026-6-16":"work","d-2026-6-17":"work","d-2026-6-18":"work","d-2026-6-19":"work","d-2026-6-20":"work","d-2026-6-21":"work","d-2026-6-28":"work","d-2026-6-29":"work","d-2026-6-30":"work","d-2026-7-1":"work","d-2026-7-2":"work","d-2026-7-3":"work","d-2026-7-4":"work","d-2026-7-11":"work","d-2026-7-12":"work","d-2026-7-13":"work","d-2026-7-14":"work","d-2026-7-15":"work","d-2026-7-16":"work","d-2026-7-17":"work","d-2026-7-18":"work","d-2026-7-25":"work","d-2026-7-26":"work","d-2026-7-27":"work","d-2026-7-28":"work","d-2026-7-29":"work","d-2026-7-30":"work","d-2026-7-31":"work","d-2026-8-1":"work","d-2026-8-8":"work","d-2026-8-9":"work","d-2026-8-10":"work","d-2026-8-11":"work","d-2026-8-12":"work","d-2026-8-13":"work","d-2026-8-14":"work","d-2026-8-15":"work","d-2026-8-22":"work","d-2026-8-23":"work","d-2026-8-24":"work","d-2026-8-25":"work","d-2026-8-26":"work","d-2026-8-27":"work","d-2026-8-28":"work","d-2026-8-29":"work","d-2026-9-6":"work","d-2026-9-7":"work","d-2026-9-8":"work","d-2026-9-9":"work","d-2026-9-10":"work","d-2026-9-11":"work","d-2026-9-12":"work","d-2026-9-13":"work","d-2026-9-20":"work","d-2026-9-21":"work","d-2026-9-22":"work","d-2026-9-23":"work","d-2026-9-24":"work","d-2026-9-25":"work","d-2026-9-26":"work","d-2026-9-27":"work","d-2026-10-3":"work","d-2026-10-4":"work","d-2026-10-5":"work","d-2026-10-6":"work","d-2026-10-7":"work","d-2026-10-8":"work","d-2026-10-9":"work","d-2026-10-10":"work","d-2026-10-17":"work","d-2026-10-18":"work","d-2026-10-19":"work","d-2026-10-20":"work","d-2026-10-21":"work","d-2026-10-22":"work","d-2026-10-23":"work","d-2026-10-24":"work","d-2026-11-1":"work","d-2026-11-2":"work","d-2026-11-3":"work","d-2026-11-4":"work","d-2026-11-5":"work","d-2026-11-6":"work","d-2026-11-7":"work","d-2026-11-8":"work","d-2026-11-15":"work","d-2026-11-16":"work","d-2026-11-17":"work","d-2026-11-18":"work","d-2026-11-19":"work","d-2026-11-20":"work","d-2026-11-21":"work","d-2026-11-22":"work","d-2026-11-29":"work","d-2026-11-30":"work","note-d-2026-0-9":"krev Semily objednat srdce, objednat ocní","note-d-2026-9-8":"Jáša Trucková v 10h","d-2026-4-1":"day-off","d-2026-4-2":"day-off","d-2026-4-3":"day-off","d-2026-4-4":"day-off","d-2026-4-13":"day-off","d-2026-4-14":"day-off","d-2026-4-15":"day-off","d-2026-4-16":"day-off","d-2026-4-17":"day-off","d-2026-4-18":"day-off","d-2026-4-27":"day-off","d-2026-4-28":"day-off","d-2026-4-29":"day-off","d-2026-4-30":"day-off","d-2026-4-31":"day-off","d-2026-5-1":"day-off","d-2026-5-10":"day-off","d-2026-5-11":"day-off","d-2026-5-12":"day-off","d-2026-5-13":"day-off","d-2026-5-14":"day-off","d-2026-5-15":"day-off","d-2026-5-24":"day-off","d-2026-5-25":"day-off","d-2026-5-26":"day-off","d-2026-5-27":"day-off","d-2026-5-28":"day-off","d-2026-5-29":"day-off","d-2026-6-8":"day-off","d-2026-6-9":"day-off","d-2026-6-10":"day-off","d-2026-6-22":"day-off","d-2026-6-23":"day-off","d-2026-6-24":"day-off","d-2026-6-25":"day-off","d-2026-6-26":"day-off","d-2026-6-11":"day-off","d-2026-6-12":"day-off","d-2026-6-13":"day-off","d-2026-6-31":"day-off","d-2026-6-27":"day-off","d-2026-7-5":"day-off","d-2026-7-6":"day-off","d-2026-7-7":"day-off","d-2026-7-8":"day-off","d-2026-7-9":"day-off","d-2026-7-19":"day-off","d-2026-7-20":"day-off","d-2026-7-21":"day-off","d-2026-7-22":"day-off","d-2026-7-23":"day-off","d-2026-7-10":"day-off","d-2026-7-24":"day-off","d-2026-8-2":"day-off","d-2026-8-3":"day-off","d-2026-8-4":"day-off","d-2026-8-5":"day-off","d-2026-8-6":"day-off","d-2026-8-7":"day-off","d-2026-8-16":"day-off","d-2026-8-17":"day-off","d-2026-8-18":"day-off","d-2026-8-19":"day-off","d-2026-8-20":"day-off","d-2026-8-21":"day-off","d-2026-8-30":"day-off","d-2026-9-1":"day-off","d-2026-9-2":"day-off","d-2026-9-3":"day-off","d-2026-9-4":"day-off","d-2026-9-5":"day-off","d-2026-9-14":"day-off","d-2026-9-15":"day-off","d-2026-9-16":"day-off","d-2026-9-17":"day-off","d-2026-9-18":"day-off","d-2026-9-19":"day-off","d-2026-9-28":"day-off","d-2026-9-29":"day-off","d-2026-9-30":"day-off","d-2026-9-31":"day-off","d-2026-10-1":"day-off","d-2026-10-2":"day-off","d-2026-10-11":"day-off","d-2026-10-12":"day-off","d-2026-10-13":"day-off","d-2026-10-14":"day-off","d-2026-10-15":"day-off","d-2026-10-16":"day-off","d-2026-10-25":"day-off","d-2026-10-26":"day-off","d-2026-10-27":"day-off","d-2026-10-28":"day-off","d-2026-10-29":"day-off","d-2026-10-30":"day-off","d-2026-11-9":"day-off","d-2026-11-10":"day-off","d-2026-11-11":"day-off","d-2026-11-12":"day-off","d-2026-11-13":"day-off","d-2026-11-14":"day-off","d-2026-11-23":"day-off","d-2026-11-24":"day-off","d-2026-11-25":"day-off","d-2026-11-26":"day-off","d-2026-11-27":"day-off","d-2026-11-28":"day-off","d-2026-11-31":"day-off"}</script>
+    <script id="embeddedData" type="application/json">{"d-2026-0-9":"day-off","d-2026-0-10":"day-off","d-2026-0-11":"day-off","d-2026-0-12":"day-off","d-2026-0-13":"work","d-2026-0-14":"work","d-2026-0-15":"work","d-2026-0-16":"work","d-2026-0-17":"work","d-2026-0-18":"work","d-2026-0-19":"work","d-2026-0-20":"work","d-2026-0-21":"day-off","d-2026-0-22":"day-off","d-2026-0-23":"day-off","d-2026-0-24":"day-off","d-2026-0-25":"day-off","d-2026-0-26":"day-off","d-2026-0-27":"work","d-2026-0-28":"work","d-2026-0-29":"work","d-2026-0-30":"work","d-2026-0-31":"work","d-2026-1-2":"work","d-2026-1-3":"work","d-2026-1-4":"day-off","d-2026-1-1":"work","d-2026-1-5":"day-off","d-2026-1-6":"day-off","d-2026-1-7":"day-off","d-2026-1-8":"day-off","d-2026-1-9":"day-off","d-2026-1-10":"work","d-2026-1-11":"work","d-2026-1-12":"work","d-2026-1-13":"work","d-2026-1-14":"work","d-2026-1-15":"work","d-2026-1-16":"work","d-2026-1-17":"work","d-2026-1-18":"day-off","d-2026-1-19":"day-off","d-2026-1-20":"day-off","d-2026-1-21":"day-off","d-2026-1-22":"day-off","d-2026-1-23":"day-off","d-2026-1-24":"work","d-2026-1-25":"work","d-2026-1-26":"work","d-2026-1-27":"work","d-2026-1-28":"work","d-2026-2-1":"work","d-2026-2-2":"work","d-2026-2-3":"work","d-2026-2-4":"day-off","d-2026-2-5":"day-off","d-2026-2-6":"day-off","d-2026-2-7":"day-off","d-2026-2-8":"day-off","d-2026-2-9":"day-off","d-2026-2-10":"work","d-2026-2-11":"work","d-2026-2-12":"work","d-2026-2-13":"work","d-2026-2-14":"work","d-2026-2-15":"work","d-2026-2-16":"work","d-2026-2-17":"work","d-2026-2-18":"day-off","d-2026-2-19":"day-off","d-2026-2-20":"day-off","d-2026-2-21":"day-off","d-2026-2-22":"day-off","d-2026-2-23":"day-off","d-2026-2-24":"work","d-2026-2-25":"work","d-2026-2-26":"work","d-2026-2-27":"work","d-2026-2-28":"work","d-2026-3-1":"day-off","d-2026-3-2":"day-off","d-2026-3-3":"day-off","d-2026-3-4":"day-off","d-2026-3-5":"day-off","d-2026-3-6":"day-off","d-2026-3-7":"work","d-2026-3-8":"work","d-2026-3-9":"work","d-2026-3-10":"work","d-2026-3-11":"work","d-2026-3-12":"work","d-2026-3-13":"work","d-2026-3-14":"work","d-2026-3-15":"day-off","d-2026-3-16":"day-off","d-2026-3-17":"day-off","d-2026-3-18":"day-off","d-2026-3-19":"day-off","d-2026-3-20":"day-off","d-2026-3-21":"work","d-2026-3-22":"work","d-2026-3-23":"work","d-2026-3-24":"work","d-2026-3-25":"work","d-2026-3-26":"work","d-2026-3-27":"work","d-2026-3-28":"work","d-2026-3-29":"day-off","d-2026-3-30":"day-off","d-2026-3-31":"day-off","d-2026-4-1":"day-off","d-2026-4-2":"day-off","d-2026-4-3":"day-off","note-d-2026-0-9":"krev Semily objednat srdce, objednat ocní"}</script>
 
     <script>
         let storage = {};
-        try {
-            const rawData = document.getElementById('embeddedData').textContent;
-            storage = JSON.parse(rawData || '{}');
-        } catch(e) { storage = {}; }
+        try { storage = JSON.parse(document.getElementById('embeddedData').textContent || '{}'); } catch(e) { storage = {}; }
 
-        let currentDate = new Date();
+        let currentDate = new Date(2026, 0, 1);
         let currentTool = 'work';
         let isDrawing = false;
         let isYearView = true;
         const months = ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
-
-        const holidays = {
-            "1-0": "Nový rok", "1-4": "Svátek práce", "8-4": "Den vítězství",
-            "5-6": "Věrozvěsti", "6-6": "Jan Hus", "28-8": "Státnost",
-            "28-9": "Vznik ČSR", "17-10": "Svoboda",
-            "24-11": "Štědrý den", "25-11": "1. svátek", "26-11": "2. svátek",
-            "3-3": "Velký pátek", "6-3": "Velikonoce"
-        };
-
+        const holidays = {"1-0": "Nový rok", "3-3": "Velký pátek", "6-3": "Velikonoce", "1-4": "Svátek práce", "8-4": "Den vítězství", "5-6": "Věrozvěsti", "6-6": "Jan Hus", "28-8": "Státnost", "28-9": "Vznik ČSR", "17-10": "Svoboda", "24-11": "Štědrý den", "25-11": "1. svátek", "26-11": "2. svátek"};
         const toolNames = { "work": "Práce", "day-off": "Volno", "vacation": "Dovolená" };
 
         function setTool(tool, element) {
@@ -132,99 +115,54 @@
         }
 
         function stopDrawing() { isDrawing = false; }
-
-        function navigate(step) {
-            if (isYearView) currentDate.setFullYear(currentDate.getFullYear() + step);
-            else currentDate.setMonth(currentDate.getMonth() + step);
-            render();
-        }
-
-        function toggleView() {
-            isYearView = !isYearView;
-            document.getElementById('calendarContainer').className = isYearView ? "view-container year-view" : "view-container month-view";
-            document.getElementById('viewToggle').textContent = isYearView ? "Měsíční pohled" : "Celý rok";
-            render();
-        }
+        function navigate(step) { if (isYearView) currentDate.setFullYear(currentDate.getFullYear() + step); else currentDate.setMonth(currentDate.getMonth() + step); render(); }
+        function toggleView() { isYearView = !isYearView; document.getElementById('calendarContainer').className = isYearView ? "view-container year-view" : "view-container month-view"; document.getElementById('viewToggle').textContent = isYearView ? "Měsíční pohled" : "Celý rok"; render(); }
 
         function applyTool(cell, dayId) {
-            if (currentTool === 'clear') { delete storage[dayId]; cell.className = ''; }
-            else { storage[dayId] = currentTool; cell.className = currentTool; }
-            render(); // Rekurzivní render pro aktualizaci textu svátku a seznamu
+            if (currentTool === 'clear') delete storage[dayId]; else storage[dayId] = currentTool;
+            render();
         }
 
         function addNote(e, dayId, dayNum, monthIdx, year) {
             e.preventDefault();
-            const oldNote = storage["note-" + dayId] || "";
-            const newNote = prompt(`Poznámka pro ${dayNum}. ${months[monthIdx]}:`, oldNote);
+            const newNote = prompt(`Poznámka ${dayNum}. ${months[monthIdx]}:`, storage["note-" + dayId] || "");
             if (newNote === null) return;
-            if (newNote.trim() === "") delete storage["note-" + dayId];
-            else storage["note-" + dayId] = newNote;
+            if (newNote.trim() === "") delete storage["note-" + dayId]; else storage["note-" + dayId] = newNote;
             render();
         }
 
         function createMonthHTML(year, mIdx) {
             const card = document.createElement('div');
             card.className = 'month-card';
-            card.setAttribute('data-month', mIdx);
-            
-            const workDaysInMonth = Object.keys(storage).filter(key => 
-                key.startsWith(`d-${year}-${mIdx}-`) && storage[key] === 'work'
-            ).length;
-
-            card.innerHTML = `<h3 class="month-title">${months[mIdx]} ${year}</h3>
-                              <div class="work-counter">Počet směn: ${workDaysInMonth}</div>`;
-            
+            const workDays = Object.keys(storage).filter(k => k.startsWith(`d-${year}-${mIdx}-`) && storage[k] === 'work').length;
+            card.innerHTML = `<h3 class="month-title">${months[mIdx]} ${year}</h3><div class="work-counter">Směn: ${workDays}</div>`;
             const table = document.createElement('table');
             table.innerHTML = `<thead><tr><th>Po</th><th>Út</th><th>St</th><th>Čt</th><th>Pá</th><th>So</th><th>Ne</th></tr></thead>`;
             const tbody = document.createElement('tbody');
-            
-            let firstDay = new Date(year, mIdx, 1).getDay();
-            let startOffset = (firstDay === 0) ? 6 : firstDay - 1;
-            let daysInMonth = new Date(year, mIdx + 1, 0).getDate();
-            
-            const realToday = new Date();
-
+            let start = (new Date(year, mIdx, 1).getDay() || 7) - 1;
+            let days = new Date(year, mIdx + 1, 0).getDate();
             let d = 1;
             for (let r = 0; r < 6; r++) {
                 const tr = document.createElement('tr');
                 for (let c = 0; c < 7; c++) {
                     const cell = document.createElement('td');
-                    if ((r === 0 && c < startOffset) || d > daysInMonth) {
-                        cell.className = 'empty';
-                    } else {
-                        const dayNum = d;
-                        const dayId = `d-${year}-${mIdx}-${dayNum}`;
-                        const holKey = `${dayNum}-${mIdx}`;
-                        
-                        // Základní číslo dne
-                        cell.innerHTML = `<span>${dayNum}</span>`;
-                        
+                    if ((r === 0 && c < start) || d > days) { cell.className = 'empty'; } 
+                    else {
+                        const dayId = `d-${year}-${mIdx}-${d}`;
+                        const hol = holidays[`${d}-${mIdx}`];
+                        cell.innerHTML = `<span>${d}</span>${hol ? `<span class="holiday-text">${hol}</span>` : ''}`;
                         if (storage[dayId]) cell.className = storage[dayId];
-                        
-                        // Zobrazení svátku přímo v tabulce
-                        if (year === 2026 && holidays[holKey]) {
-                            cell.classList.add('holiday');
-                            const span = document.createElement('span');
-                            span.className = 'holiday-text';
-                            span.textContent = holidays[holKey];
-                            cell.appendChild(span);
-                        }
-
-                        if (realToday.getDate() === dayNum && realToday.getMonth() === mIdx && realToday.getFullYear() === year) {
-                            cell.classList.add('today');
-                        }
-
+                        if (hol && year === 2026) cell.classList.add('holiday');
                         if (storage["note-" + dayId]) cell.classList.add('has-note');
-                        
+                        const currentD = d;
                         cell.onmousedown = (e) => { if(e.button === 0) { isDrawing = true; applyTool(cell, dayId); } };
                         cell.onmouseenter = () => { if(isDrawing) applyTool(cell, dayId); };
-                        cell.oncontextmenu = (e) => addNote(e, dayId, dayNum, mIdx, year);
+                        cell.oncontextmenu = (e) => addNote(e, dayId, currentD, mIdx, year);
                         d++;
                     }
                     tr.appendChild(cell);
                 }
-                tbody.appendChild(tr);
-                if (d > daysInMonth) break;
+                tbody.appendChild(tr); if (d > days) break;
             }
             table.appendChild(tbody); card.appendChild(table); return card;
         }
@@ -233,64 +171,43 @@
             const container = document.getElementById('calendarContainer');
             const notesCont = document.getElementById('notesContainer');
             container.innerHTML = ''; notesCont.innerHTML = '';
-            
             const y = currentDate.getFullYear();
-            const m = currentDate.getMonth();
-            document.getElementById('displayLabel').textContent = isYearView ? y : months[m] + " " + y;
-
-            const toShow = isYearView ? [0,1,2,3,4,5,6,7,8,9,10,11] : [m];
+            document.getElementById('displayLabel').textContent = isYearView ? y : months[currentDate.getMonth()] + " " + y;
+            const toShow = isYearView ? [0,1,2,3,4,5,6,7,8,9,10,11] : [currentDate.getMonth()];
             toShow.forEach(idx => container.appendChild(createMonthHTML(y, idx)));
 
-            const listItems = [];
-
-            if (y === 2026) {
-                for (let hKey in holidays) {
-                    const [d, mIdx] = hKey.split('-').map(Number);
-                    const dayId = `d-2026-${mIdx}-${d}`;
-                    const shift = storage[dayId] ? toolNames[storage[dayId]] : "Nenaplánováno";
-                    listItems.push({
-                        date: new Date(2026, mIdx, d),
-                        text: `${holidays[hKey]} <span class="směna-info">Máte: ${shift}</span>`,
-                        isHoliday: true
-                    });
-                }
-            }
-
-            Object.keys(storage).filter(k => k.startsWith('note-d-')).forEach(k => {
-                const p = k.split('-');
-                listItems.push({
-                    date: new Date(p[2], p[3], p[4]),
-                    text: storage[k],
-                    isHoliday: false
-                });
+            const items = [];
+            if (y === 2026) Object.keys(holidays).forEach(h => {
+                const [d, m] = h.split('-').map(Number);
+                const shift = storage[`d-2026-${m}-${d}`] ? toolNames[storage[`d-2026-${m}-${d}`]] : "Volno/Neuvedeno";
+                items.push({ date: new Date(2026, m, d), text: `${holidays[h]} (Máte: ${shift})`, isH: true });
             });
+            Object.keys(storage).filter(k => k.startsWith('note-d-')).forEach(k => {
+                const p = k.split('-'); items.push({ date: new Date(p[2], p[3], p[4]), text: storage[k], isH: false });
+            });
+            items.sort((a,b) => a.date - b.date).forEach(item => {
+                const div = document.createElement('div'); div.className = 'note-item';
+                div.innerHTML = `<span class="note-date">${item.date.getDate()}. ${months[item.date.getMonth()]}</span><span class="${item.isH ? 'holiday-note' : ''}">${item.text}</span>`;
+                notesCont.appendChild(div);
+            });
+        }
 
-            listItems.sort((a, b) => a.date - b.date);
+        function generateHTML() {
+            const data = JSON.stringify(storage);
+            let html = document.documentElement.outerHTML;
+            return '<!DOCTYPE html>\n' + html.replace(/<script id="embeddedData".*?<\/script>/s, `<script id="embeddedData" type="application\/json">${data}<\/script>`);
+        }
 
-            if (listItems.length === 0) {
-                notesCont.innerHTML = "<p style='color:#888;'>Žádné záznamy.</p>";
-            } else {
-                listItems.forEach(item => {
-                    const noteDiv = document.createElement('div');
-                    noteDiv.className = 'note-item';
-                    const dateStr = `${item.date.getDate()}. ${months[item.date.getMonth()]}`;
-                    noteDiv.innerHTML = `<span class="note-date">${dateStr}</span> 
-                                         <span class="${item.isHoliday ? 'holiday-note' : ''}">${item.isHoliday ? '🚩 ' + item.text : item.text}</span>`;
-                    notesCont.appendChild(noteDiv);
-                });
-            }
+        function copyCodeToClipboard() {
+            navigator.clipboard.writeText(generateHTML()).then(() => {
+                const s = document.getElementById('copyStatus'); s.textContent = "ZKOPÍROVÁNO! Nyní vložte na GitHub.";
+                setTimeout(() => s.textContent = "", 4000);
+            });
         }
 
         function saveToDisk() {
-            const dataStr = JSON.stringify(storage);
-            let html = document.documentElement.outerHTML;
-            html = html.replace(/<script id="embeddedData" type="application\/json">.*?<\/script>/s, 
-                                `<script id="embeddedData" type="application\/json">${dataStr}<\/script>`);
-            const blob = new Blob(['<!DOCTYPE html>\n' + html], {type: 'text/html'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `planovac_2026.html`;
-            a.click();
+            const blob = new Blob([generateHTML()], {type: 'text/html'});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'planovac_2026.html'; a.click();
         }
 
         render();
